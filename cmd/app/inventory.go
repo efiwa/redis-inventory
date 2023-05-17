@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"crypto/tls"
 	"os"
 
 	"github.com/mediocregopher/radix/v4"
@@ -22,13 +23,27 @@ var scanCmd = &cobra.Command{
 		consoleLogger := logger.NewConsoleLogger(logLevel)
 		consoleLogger.Info().Msg("Start scanning")
 
-		clientSource, err := (radix.PoolConfig{}).New(context.Background(), "tcp", args[0])
+		dialer := radix.Dialer{
+			AuthPass: "<redis-password-here>",
+		}
+
+		dialer.NetDialer = &tls.Dialer{
+			NetDialer: nil,
+			Config:    nil,
+		}
+
+		cfg := radix.ClusterConfig{PoolConfig: radix.PoolConfig{
+			Dialer: dialer,
+		}}
+
+		client, err := cfg.New(context.Background(), []string{args[0]})
+
 		if err != nil {
 			consoleLogger.Fatal().Err(err).Msg("Can't create redis client")
 		}
 
 		redisScanner := scanner.NewScanner(
-			adapter.NewRedisService(clientSource),
+			adapter.NewRedisService(*client),
 			adapter.NewPrettyProgressWriter(os.Stdout),
 			consoleLogger,
 		)

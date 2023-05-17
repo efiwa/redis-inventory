@@ -1,5 +1,4 @@
-Redis Inventory
-===============
+# Redis Inventory
 
 [![Build Status](https://travis-ci.com/obukhov/redis-inventory.svg?branch=master)](https://travis-ci.com/obukhov/redis-inventory)
 [![Coverage Status](https://coveralls.io/repos/github/obukhov/redis-inventory/badge.svg?branch=master)](https://coveralls.io/github/obukhov/redis-inventory?branch=master)
@@ -47,14 +46,16 @@ Outputs it as a nice table
 ```
 
 It also can render sunburst diagrams to visualize it:
+
 ```bash
 $ redis-inventory inventory <redis-url> --output=chart --maxChildren=100
 ```
 
-
 [![Full sunburst diagram](docs/images/diagram1000.png)](docs/images/diagram.png)
 
 Read more about [usage](docs/usage.md)
+
+NOTE: in order to use the inventory command you must replace the redis password placeholder (search for `"<redis-password-here>"`) with an actual password and (re-)build (`go build -o redis-inventory main.go`)
 
 ## Installation
 

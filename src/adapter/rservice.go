@@ -15,7 +15,7 @@ type ScanOptions struct {
 }
 
 // NewRedisService creates RedisService
-func NewRedisService(client radix.Client) RedisService {
+func NewRedisService(client radix.Cluster) RedisService {
 	return RedisService{
 		client: client,
 	}
@@ -23,7 +23,7 @@ func NewRedisService(client radix.Client) RedisService {
 
 // RedisService implementation for iteration over redis
 type RedisService struct {
-	client radix.Client
+	client radix.Cluster
 }
 
 // ScanKeys scans keys asynchroniously and sends them to the returned channel

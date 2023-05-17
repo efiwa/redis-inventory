@@ -2,6 +2,9 @@ package app
 
 import (
 	"context"
+	"crypto/tls"
+	"os"
+
 	"github.com/mediocregopher/radix/v4"
 	"github.com/obukhov/redis-inventory/src/adapter"
 	"github.com/obukhov/redis-inventory/src/logger"
@@ -9,7 +12,6 @@ import (
 	"github.com/obukhov/redis-inventory/src/scanner"
 	"github.com/obukhov/redis-inventory/src/trie"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var indexCmd = &cobra.Command{
@@ -21,13 +23,27 @@ var indexCmd = &cobra.Command{
 		consoleLogger := logger.NewConsoleLogger(logLevel)
 		consoleLogger.Info().Msg("Start indexing")
 
-		clientSource, err := (radix.PoolConfig{}).New(context.Background(), "tcp", args[0])
+		dialer := radix.Dialer{
+			AuthPass: "<redis-password-here>",
+		}
+
+		dialer.NetDialer = &tls.Dialer{
+			NetDialer: nil,
+			Config:    nil,
+		}
+
+		cfg := radix.ClusterConfig{PoolConfig: radix.PoolConfig{
+			Dialer: dialer,
+		}}
+
+		client, err := cfg.New(context.Background(), []string{args[0]})
+
 		if err != nil {
 			consoleLogger.Fatal().Err(err).Msg("Can't create redis client")
 		}
 
 		redisScanner := scanner.NewScanner(
-			adapter.NewRedisService(clientSource),
+			adapter.NewRedisService(*client),
 			adapter.NewPrettyProgressWriter(os.Stdout),
 			consoleLogger,
 		)
